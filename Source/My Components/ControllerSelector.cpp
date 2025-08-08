@@ -12,8 +12,14 @@
 
 ControllerSelector::ControllerSelector() {
     int status = initializeSDL();
-    selectedGamepad = 0;
-    controllerDropdown.setSelectedId(0);
+    if (numGamepads > 0) {
+        selectedGamepad = 1;
+        controllerDropdown.setSelectedId(1);
+    }
+    else {
+        selectedGamepad = 0;
+        controllerDropdown.setSelectedId(0);
+    }
 
     addAndMakeVisible(rescanButton);
     addAndMakeVisible(controllerDropdown);
@@ -25,12 +31,15 @@ ControllerSelector::ControllerSelector() {
 void ControllerSelector::paint(juce::Graphics & g) {
 
 }
+
 void ControllerSelector::resized() {
 
 }
+
 SDL_Gamepad* ControllerSelector::getController() {
     return SDL_OpenGamepad(scannedGamepadIDs[0]);
 }
+
 int ControllerSelector::initializeSDL() {
     if (SDL_Init(SDL_INIT_GAMEPAD | SDL_INIT_EVENTS) < 0) {
         DBG("SDL Failed");
@@ -60,23 +69,23 @@ int ControllerSelector::initializeSDL() {
             DBG(message);
 
             if (numGamepads > 0) {
-                SDL_Gamepad* myController = SDL_OpenGamepad(scannedGamepadIDs[0]);
-                juce::String controllerName = SDL_GetGamepadName(myController);
-                message = "Controller Name: " + controllerName;
-                DBG(message);
+                for (int i = 0; i < numGamepads; i++) {
+                    SDL_Gamepad* myController = SDL_OpenGamepad(scannedGamepadIDs[i]);
+                    juce::String controllerName = SDL_GetGamepadName(myController);
+                    message = "Controller #: " + juce::String(numGamepads) + ", Name: " + controllerName;
+                    DBG(message);
+                }
             }
             else {
                 DBG("No Controllers Detected At Startup");
             }
-
             DBG("\n\n\n");
         }
     }
-    // Success!
     return 0;
 }
 
-int ControllerSelector::scanControllers() {
+void ControllerSelector::scanControllers() {
 
     controllerDropdown.clear();
     scannedGamepadIDs = nullptr;
@@ -84,16 +93,16 @@ int ControllerSelector::scanControllers() {
 
     for (int i = 0; i < numGamepads; i++) {
         SDL_Gamepad* myController = SDL_OpenGamepad(scannedGamepadIDs[i]);
-        controllerDropdown.addItem(SDL_GetGamepadName(myController), i);
+        controllerDropdown.addItem(SDL_GetGamepadName(myController), i + 1);
     }
 
     statusLabel.setText("Select a Controller", juce::dontSendNotification);
 
-    return numGamepads;
+    return;
 }
 
 void ControllerSelector::changeController() {
     selectedGamepad = controllerDropdown.getSelectedId();
-    // At this point, we need to communicate to the main component that the controller is changing.
+    // At this point, we need to communicate to the main component that the selected controller is changing.
     return;
 }

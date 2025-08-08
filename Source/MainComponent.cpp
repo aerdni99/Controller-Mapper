@@ -45,6 +45,8 @@ MainComponent::MainComponent()
         if (midiInput)
             midiInput->start();
     }
+
+    deadzoneOffset = 4000;
 }
 
 MainComponent::~MainComponent()
@@ -129,8 +131,51 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
 }
 
 void MainComponent::timerCallback() {
-    std::scoped_lock lock(midiLogMutex);
 
+
+    
+    // poll for SDL messages.
+    SDL_Event event;
+    SDL_Gamepad* myController;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_EVENT_GAMEPAD_ADDED: {
+            myController = SDL_OpenGamepad(event.gdevice.which);
+            DBG("New Controller Connected Named: " << SDL_GetGamepadName(myController));
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_REMOVED: {
+            myController = SDL_OpenGamepad(event.gdevice.which);
+            DBG("Controller Removed Named: " << SDL_GetGamepadName(myController));
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
+            DBG("Controller Button Down: ");
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+            DBG("Controller Button Up: ");
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
+            int axisVal = axisConversion(event.gaxis.value);
+            if (axisVal != 63) {
+                DBG("Axis Val: " << axisVal);
+            }
+            break;
+        }
+        case SDL_EVENT_QUIT: {
+            DBG("SDL_QUIT received.");
+            break;
+        }
+        default: {
+            break;
+        }
+        }
+    }
+
+    // log midi messages to my console
+    std::scoped_lock lock(midiLogMutex);
     for (const auto& msg : midiLogQueue) {
         midiConsole->appendMessage(msg);
     }
@@ -140,5 +185,18 @@ void MainComponent::timerCallback() {
 }
 
 void MainComponent::showControllerSelector() {
+    return;
+}
 
+int MainComponent::axisConversion(int axisVal) {
+    if (deadzoneOffset > 0 && abs(axisVal) < deadzoneOffset) {
+        // return center value
+        return 63;
+    }
+
+    int maxVal = (32767 - deadzoneOffset);
+    if (axisVal > 0) {
+        return (axisVal - deadzoneOffset + maxVal) * (64.0f / maxVal);
+    }
+    return (axisVal + deadzoneOffset + maxVal)* (64.0f / maxVal);
 }

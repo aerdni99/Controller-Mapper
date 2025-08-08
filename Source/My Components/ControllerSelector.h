@@ -25,7 +25,7 @@ public:
     void resized() override;
     SDL_Gamepad* getController();
     int initializeSDL();
-    int scanControllers();
+    void scanControllers();
     void changeController();
 
 private:

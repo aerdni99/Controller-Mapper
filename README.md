@@ -55,3 +55,17 @@ and add to /Builds/VisualStudio2022/x64/Debug/
 So I've thought harder about my usee case and whether or not JUCE is a good fit for my project. It seems like JUCE is a lot of unnecessary bulk.
 I'm not processing audio or receiving MIDI, and I have to use 3rd party tools to receive controller input (SDL) and send midi output (midiLoop/rtmidi)
 The main perk of JUCE at this point is gonna be the GUI Building. I'm gonna use the juce::Timer to poll messages, and I'll use their midi message object for creating midi messages. But man... I'vee put a lot of time into this, particularly learning JUCE stuff, and now it feels like I could accomplish my product without JUCE haha.
+
+Something useful from SDL's documentation: use SDL_AddEventWatch() to set a callback when a new event arrives. 
+This might be a good way to alert users of controller connect/disconnect.
+
+When a controller connected at a time besides startup, it needs to be opened (or opened again even if it was previously connected during runtime).
+
+my controller seems to send axis motion signals while idling. I can look into disregarding signals below a certain threshold? it's an old controller. 
+Can add a "dead-zone" to fix this.
+
+I'm worried that my SDL event polling is too slow and I can't keep up, but it's difficult to tell until I can remove the pollution caused by idle axis motion
+
+I had a great idea for some functionality down the line for this application. My original concept was for a performance tool. edit parameters of audio in real time with a gamepad. Create a unique customizable control scheme that could be useful for live adjusting parameters in music. But as I was working on the logic for selecting an active controller, I thought to myself that it would actually be cool to allow any number of active controllers, the same way Ableton lets users have many active midi controllers that are enabled for certain things and not for others. Anyways, that got me thinking I could make my original idea as a "performance mode" and then also I could have a mode that works like a party game. People could still have customizable controls and stuff, but there could be hero's in the game, like a time warp character, a reverb/delay character, a termolo/vibrato character, etc. And It could be like a minigame party mode. 
+
+Note that DAW transports do not show up in the midi console. I'll have to look further into what data/signal is being sent by those if it isn't midi, or maybe it just isnt handled by my console.

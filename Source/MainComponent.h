@@ -44,6 +44,9 @@ private:
     void toggleConsole();
     void showControllerSelector();
 
+    int axisConversion(int axisVal);
+    int deadzoneOffset;
+
     std::mutex midiLogMutex;
     juce::StringArray midiLogQueue;
 
