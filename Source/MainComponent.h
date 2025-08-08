@@ -44,7 +44,7 @@ private:
     void toggleConsole();
     void showControllerSelector();
 
-    int axisConversion(int axisVal);
+    int axisConversion(SDL_GamepadAxisEvent axisEvent);
     int deadzoneOffset;
 
     std::mutex midiLogMutex;
@@ -53,6 +53,8 @@ private:
     SDL_Gamepad* controller;
 
     std::unique_ptr<juce::MidiInput> midiInput;
+
+    juce::String decodeAxis(int axis);
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

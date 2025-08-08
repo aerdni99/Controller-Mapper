@@ -158,10 +158,14 @@ void MainComponent::timerCallback() {
             break;
         }
         case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
-            int axisVal = axisConversion(event.gaxis.value);
-            if (axisVal != 63) {
-                DBG("Axis Val: " << axisVal);
+            int axisVal = axisConversion(event.gaxis);
+            // Joystick Deadzone
+            if (axisVal == 63 && event.gaxis.axis < 4) {
+                break;
             }
+
+            // Log Event
+            DBG(decodeAxis(event.gaxis.axis) << axisVal);
             break;
         }
         case SDL_EVENT_QUIT: {
@@ -188,15 +192,40 @@ void MainComponent::showControllerSelector() {
     return;
 }
 
-int MainComponent::axisConversion(int axisVal) {
-    if (deadzoneOffset > 0 && abs(axisVal) < deadzoneOffset) {
+int MainComponent::axisConversion(SDL_GamepadAxisEvent axisEvent) {
+    //Trigger
+    if (axisEvent.axis == 4 || axisEvent.axis == 5) {
+        return axisEvent.value * 127.0f / 32767;
+    }
+
+    //Joystick
+    if (deadzoneOffset > 0 && abs(axisEvent.value) < deadzoneOffset) {
         // return center value
         return 63;
     }
-
     int maxVal = (32767 - deadzoneOffset);
-    if (axisVal > 0) {
-        return (axisVal - deadzoneOffset + maxVal) * (64.0f / maxVal);
+    if (axisEvent.value > 0) {
+        return (axisEvent.value - deadzoneOffset + maxVal) * (127.0f / (2 * maxVal));
     }
-    return (axisVal + deadzoneOffset + maxVal)* (64.0f / maxVal);
+    return (axisEvent.value + deadzoneOffset + maxVal) * (127.0f / (2 * maxVal));
+}
+
+juce::String MainComponent::decodeAxis(int axis) {
+    switch (axis) {
+    case 0:
+        return juce::String("LS X Val: ");
+    case 1:
+        return juce::String("LS Y Val: ");
+    case 2:
+        return juce::String("RS X Val: ");
+    case 3:
+        return juce::String("RS Y Val: ");
+    case 4:
+        return juce::String("L2 Val: ");
+    case 5:
+        return juce::String("R2 Val: ");
+    default:
+        // I don't anticipate hitting this error,. but if I do, this handling is weak.
+        return juce::String("<undefined axis>: " + juce::String(axis));
+    }
 }
