@@ -45,3 +45,13 @@ This application detects gamepads connected to your PC and allows you to map Pla
 - C++17-compatible compiler
 - SDL3 development libraries
 - A DualShock PS4 controller
+
+### Notes
+
+In order for SDL3 to work, you need to add a copy of the executable to your build folder.
+copy SDL3.dll from lib/SDL3/bin/SDL3.dll
+and add to /Builds/VisualStudio2022/x64/Debug/
+
+So I've thought harder about my usee case and whether or not JUCE is a good fit for my project. It seems like JUCE is a lot of unnecessary bulk.
+I'm not processing audio or receiving MIDI, and I have to use 3rd party tools to receive controller input (SDL) and send midi output (midiLoop/rtmidi)
+The main perk of JUCE at this point is gonna be the GUI Building. I'm gonna use the juce::Timer to poll messages, and I'll use their midi message object for creating midi messages. But man... I'vee put a lot of time into this, particularly learning JUCE stuff, and now it feels like I could accomplish my product without JUCE haha.

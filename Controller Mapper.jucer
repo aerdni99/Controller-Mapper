@@ -1,40 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="lLFfMX" name="Controller Mapper" projectType="audioplug"
-              useAppConfig="0" addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
-  <MAINGROUP id="sUqgaC" name="Controller Mapper">
-    <GROUP id="{D36D8A0B-4922-2E6B-8A85-E53EDB8827D1}" name="Source">
-      <FILE id="mVdfZD" name="MidiConsoleComponent.cpp" compile="1" resource="0"
-            file="Source/My Components/MidiConsoleComponent.cpp"/>
-      <FILE id="mRBqql" name="MidiConsoleComponent.h" compile="0" resource="0"
-            file="Source/My Components/MidiConsoleComponent.h"/>
-      <FILE id="hyDThe" name="PS4ControllerGraphic.cpp" compile="1" resource="0"
-            file="Source/My Components/PS4ControllerGraphic.cpp"/>
-      <FILE id="fCITsp" name="PS4ControllerGraphic.h" compile="0" resource="0"
-            file="Source/My Components/PS4ControllerGraphic.h"/>
-      <FILE id="X0WAWX" name="ComponentResizerBar.h" compile="0" resource="0"
-            file="Source/My Components/ComponentResizerBar.h"/>
-      <FILE id="ul6Bs2" name="PluginProcessor.cpp" compile="1" resource="0"
-            file="Source/PluginProcessor.cpp"/>
-      <FILE id="Dl5TRf" name="PluginProcessor.h" compile="0" resource="0"
-            file="Source/PluginProcessor.h"/>
-      <FILE id="HNig9M" name="MainContent.cpp" compile="1" resource="0" file="Source/My Components/MainContent.cpp"/>
-      <FILE id="RyemgC" name="MainContent.h" compile="0" resource="0" file="Source/My Components/MainContent.h"/>
-      <FILE id="KuhgdI" name="PluginEditor.cpp" compile="1" resource="0"
-            file="Source/PluginEditor.cpp"/>
-      <FILE id="rniRBc" name="PluginEditor.h" compile="0" resource="0" file="Source/PluginEditor.h"/>
-      <FILE id="PIrC4m" name="ControllerSelector.h" compile="0" resource="0"
-            file="Source/My Components/ControllerSelector.h"/>
-      <FILE id="bfYPFj" name="ControllerSelector.cpp" compile="1" resource="0"
-            file="Source/My Components/ControllerSelector.cpp"/>
+<JUCERPROJECT id="dBeXt5" name="Controller Mapper" projectType="guiapp" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+  <MAINGROUP id="X6cFDM" name="Controller Mapper">
+    <GROUP id="{8E463688-5857-F418-B766-BBF6A44D9559}" name="Source">
+      <FILE id="rgLIld" name="Main.cpp" compile="1" resource="0" file="Source/Main.cpp"/>
+      <FILE id="YjnJDb" name="MainComponent.h" compile="0" resource="0" file="Source/MainComponent.h"/>
+      <FILE id="klvhdy" name="MainComponent.cpp" compile="1" resource="0"
+            file="Source/MainComponent.cpp"/>
     </GROUP>
+    <FILE id="pMFhVq" name="ComponentResizerBar.h" compile="0" resource="0"
+          file="Source/My Components/ComponentResizerBar.h"/>
+    <FILE id="cloX6x" name="ControllerSelector.cpp" compile="1" resource="0"
+          file="Source/My Components/ControllerSelector.cpp"/>
+    <FILE id="sXrSej" name="ControllerSelector.h" compile="0" resource="0"
+          file="Source/My Components/ControllerSelector.h"/>
+    <FILE id="otWrls" name="MainContent.cpp" compile="1" resource="0" file="Source/My Components/MainContent.cpp"/>
+    <FILE id="v5Wi2n" name="MainContent.h" compile="0" resource="0" file="Source/My Components/MainContent.h"/>
+    <FILE id="MuOflT" name="MidiConsoleComponent.cpp" compile="1" resource="0"
+          file="Source/My Components/MidiConsoleComponent.cpp"/>
+    <FILE id="LHFjnL" name="MidiConsoleComponent.h" compile="0" resource="0"
+          file="Source/My Components/MidiConsoleComponent.h"/>
+    <FILE id="jBN6DB" name="PS4ControllerGraphic.cpp" compile="1" resource="0"
+          file="Source/My Components/PS4ControllerGraphic.cpp"/>
+    <FILE id="uHa3SZ" name="PS4ControllerGraphic.h" compile="0" resource="0"
+          file="Source/My Components/PS4ControllerGraphic.h"/>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
-    <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
-            useGlobalPath="1"/>
     <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
@@ -46,7 +41,7 @@
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
   </MODULES>
-  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1" JUCE_VST3_CAN_REPLACE_VST2="0"/>
+  <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
     <VS2022 targetFolder="Builds/VisualStudio2022" externalLibraries="SDL3.lib">
       <CONFIGURATIONS>
@@ -55,20 +50,19 @@
         <CONFIGURATION isDebug="0" name="Release" targetName="Controller Mapper"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_audio_basics" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_devices" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_data_structures" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_dsp" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_events" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_graphics" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_gui_basics" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
-        <MODULEPATH id="juce_midi_ci" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_basics" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_devices" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_processors" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_core" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_data_structures" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_dsp" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_events" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_graphics" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_basics" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_gui_extra" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_midi_ci" path="../../../JUCE/modules"/>
       </MODULEPATHS>
     </VS2022>
   </EXPORTFORMATS>

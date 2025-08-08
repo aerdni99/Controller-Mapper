@@ -16,6 +16,7 @@
 class ControllerMapperAudioProcessor  : public juce::AudioProcessor
 {
 public:
+    float midiVolume;
 
     //==============================================================================
     ControllerMapperAudioProcessor();

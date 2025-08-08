@@ -28,6 +28,4 @@ private:
     juce::TextButton menuButton{ "Menu" };
     juce::Label controllerLabel;
     bool isConsoleVisible = false;
-
-    SDL_Gamepad* controller;
 };

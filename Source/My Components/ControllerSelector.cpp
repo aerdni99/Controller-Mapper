@@ -19,8 +19,8 @@ void ControllerSelector::paint(juce::Graphics & g) {
 void ControllerSelector::resized() {
 
 }
-SDL_Gamepad* ControllerSelector::selectController() {
-    return nullptr;
+SDL_Gamepad* ControllerSelector::getController() {
+    return SDL_OpenGamepad(scannedGamepadIDs[0]);
 }
 int ControllerSelector::initializeSDL() {
     if (SDL_Init(SDL_INIT_GAMEPAD | SDL_INIT_EVENTS) < 0) {
