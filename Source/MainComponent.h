@@ -53,8 +53,11 @@ private:
     SDL_Gamepad* controller;
 
     std::unique_ptr<juce::MidiInput> midiInput;
+    std::unique_ptr<juce::MidiOutput> midiOutput;
 
     juce::String decodeAxis(int axis);
+
+    int sceneOffset;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

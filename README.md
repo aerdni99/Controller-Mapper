@@ -68,6 +68,54 @@ I'm worried that my SDL event polling is too slow and I can't keep up, but it's 
 
 I had a great idea for some functionality down the line for this application. My original concept was for a performance tool. edit parameters of audio in real time with a gamepad. Create a unique customizable control scheme that could be useful for live adjusting parameters in music. But as I was working on the logic for selecting an active controller, I thought to myself that it would actually be cool to allow any number of active controllers, the same way Ableton lets users have many active midi controllers that are enabled for certain things and not for others. Anyways, that got me thinking I could make my original idea as a "performance mode" and then also I could have a mode that works like a party game. People could still have customizable controls and stuff, but there could be hero's in the game, like a time warp character, a reverb/delay character, a termolo/vibrato character, etc. And It could be like a minigame party mode. 
 
-Note that DAW transports do not show up in the midi console. I'll have to look further into what data/signal is being sent by those if it isn't midi, or maybe it just isnt handled by my console.
-
 Possible bug, controller does not snap back to zero with joysticks because of time between messages and deadzone. I need to make sure that just because I'm not logging my deadzone doesn't mean I'm not using the value there.
+
+Transport controls send commands using MCU / HUI protocols.
+
+Here's a table chatgpt game me for MCU/HUI specific midi messages for DAW transports. For starters I'm gonna get my joysticks hooked up to my daw I think.
+Command	   MIDI Message (Hex)
+Play	     90 5E 7F
+Stop	     90 5D 7F
+Record	   90 5F 7F
+Rewind	   90 5B 7F
+Fast Fwd	 90 5C 7F
+
+Midi CC messages can have a cc_number between 0 and 127, but some of these are reserved for special functions. For app users, it isn't necessary for them to know the CC message each axis is assigned to, the DAW can automatically detect and learn a CC association.
+
+CC numbers to avoid custom assigning:
+CC 0 (Bank Select MSB)
+CC 1 (Mod Wheel)
+CC 7 (Volume)
+CC 10 (Pan)
+CC 64 (Sustain Pedal)
+CC 120–127 (All notes off, omni mode, etc.)
+
+Let's say that we only give users 6 cc numbers per scene. one for each axis. And we don't give them buttons/triggers?
+Each controller can have its own midi channel? (This might be confusing, idk how it works yet)
+
+With that, we can have 15-17 assignable ranges
+11-16
+17-22
+23-28
+29-34 (Maybe problematic for CC 32)
+35-40
+41-46
+47-52
+53-58
+65-70 (Maybe problematic for CC's 65-70)
+71-76
+77-82
+83-88
+89-94
+95-100
+101-106
+107-112
+113-118
+
+ChatGPT says that midi CC numbers are uniquely assignable per midi channel. So each controller can start with the first assignable range, and then have multiple scenes that occupy sequential ranges.
+
+I'll need to make sure that I don't try to send 2 controllers to the same channel, whether it's 2 controllers from my own program, or one of mine and my keylab.
+
+Saveable scenes might not be a function of my app, but more a function of the DAW? It would be great to have my program remember which parameters were assigned where and when, but it'll be hard to get that together. It'd need to be a 2-way communication where my application listens to my DAW for ID's/names of parameters being edited, otherwise, there's no scene to save on my application's side. User's will just be assigning controls on the fly and the state of the app is unaffected.
+
+need to handle if loopMidi closes still.

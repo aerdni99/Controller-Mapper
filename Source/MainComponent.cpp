@@ -38,7 +38,6 @@ MainComponent::MainComponent()
 
     // Midi input (for testing)
     auto midiInputs = juce::MidiInput::getAvailableDevices();
-
     if (!midiInputs.isEmpty()) {
         auto deviceInfo = midiInputs[0];
         midiInput = juce::MidiInput::openDevice(deviceInfo.identifier, this);
@@ -46,7 +45,31 @@ MainComponent::MainComponent()
             midiInput->start();
     }
 
+    // Open MIDI output to virtual device
+    juce::MidiDeviceInfo myDevice;
+    for (auto& device : juce::MidiOutput::getAvailableDevices()) {
+        if (device.name == "Controller Mapper") {
+            myDevice = device;
+            break;
+        }
+    }
+    if (myDevice.identifier.isNotEmpty()) {
+        midiOutput = juce::MidiOutput::openDevice(myDevice.identifier);
+        if (midiOutput) {
+            DBG("MIDI Output Opened: " << myDevice.name);
+        }
+    }
+    else {
+        DBG("Didn't find virtual midi port");
+    }
+
+    // I found this offset by checking the raw value of signals sent by my controller's joysticks and they were always sending a signal 0-3500, so thats the "deadzone"
     deadzoneOffset = 4000;
+
+    // Scene 1 uses midi CC numbers 11-16. when the scene changes, this number will change based on the available sets of CC codes.
+    sceneOffset = 11;
+
+    DBG("Construction Complete!");
 }
 
 MainComponent::~MainComponent()
@@ -166,6 +189,9 @@ void MainComponent::timerCallback() {
 
             // Log Event
             DBG(decodeAxis(event.gaxis.axis) << axisVal);
+
+            // Send a MIDI Message to my virtual port
+            midiOutput->sendMessageNow(juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal));
             break;
         }
         case SDL_EVENT_QUIT: {
