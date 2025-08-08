@@ -12,6 +12,15 @@
 
 ControllerSelector::ControllerSelector() {
     int status = initializeSDL();
+    selectedGamepad = 0;
+    controllerDropdown.setSelectedId(0);
+
+    addAndMakeVisible(rescanButton);
+    addAndMakeVisible(controllerDropdown);
+    addAndMakeVisible(statusLabel);
+
+    rescanButton.onClick = [this] { scanControllers(); };
+    controllerDropdown.onChange = [this] { changeController(); };
 }
 void ControllerSelector::paint(juce::Graphics & g) {
 
@@ -38,9 +47,7 @@ int ControllerSelector::initializeSDL() {
         DBG("SDL Initialized Successfully!");
 
         // Get the default controller
-        scannedGamepadIDs = nullptr;
-        int numGamepads = 0;
-        scannedGamepadIDs = SDL_GetGamepads(&numGamepads);
+        scanControllers();
 
         // Check out what we got
         if (scannedGamepadIDs == NULL) {
@@ -67,4 +74,26 @@ int ControllerSelector::initializeSDL() {
     }
     // Success!
     return 0;
+}
+
+int ControllerSelector::scanControllers() {
+
+    controllerDropdown.clear();
+    scannedGamepadIDs = nullptr;
+    scannedGamepadIDs = SDL_GetGamepads(&numGamepads);
+
+    for (int i = 0; i < numGamepads; i++) {
+        SDL_Gamepad* myController = SDL_OpenGamepad(scannedGamepadIDs[i]);
+        controllerDropdown.addItem(SDL_GetGamepadName(myController), i);
+    }
+
+    statusLabel.setText("Select a Controller", juce::dontSendNotification);
+
+    return numGamepads;
+}
+
+void ControllerSelector::changeController() {
+    selectedGamepad = controllerDropdown.getSelectedId();
+    // At this point, we need to communicate to the main component that the controller is changing.
+    return;
 }

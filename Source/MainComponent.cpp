@@ -35,6 +35,16 @@ MainComponent::MainComponent()
     // Initialize Controller
     controllerSelector = std::make_unique<ControllerSelector>();
     controller = controllerSelector->getController();
+
+    // Midi input (for testing)
+    auto midiInputs = juce::MidiInput::getAvailableDevices();
+
+    if (!midiInputs.isEmpty()) {
+        auto deviceInfo = midiInputs[0];
+        midiInput = juce::MidiInput::openDevice(deviceInfo.identifier, this);
+        if (midiInput)
+            midiInput->start();
+    }
 }
 
 MainComponent::~MainComponent()
@@ -94,7 +104,8 @@ void MainComponent::toggleConsole() {
     resized();
 }
 
-void MainComponent::logMidiMessage(const juce::MidiMessage& message) {
+// This function 
+void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) {
     if (!isConsoleVisible) return;
 
     juce::String msgText;
@@ -113,19 +124,19 @@ void MainComponent::logMidiMessage(const juce::MidiMessage& message) {
         msgText = message.getDescription();
     }
 
-    midiConsole->appendMessage(msgText);
+    midiLogQueue.add(msgText);
+    return;
 }
 
 void MainComponent::timerCallback() {
-    /*std::scoped_lock lock(audioProcessor.midiLogMutex);
+    std::scoped_lock lock(midiLogMutex);
 
-    for (const auto& msg : audioProcessor.midiLogQueue) {
+    for (const auto& msg : midiLogQueue) {
         midiConsole->appendMessage(msg);
     }
 
-    audioProcessor.midiLogQueue.clear();*/
-
-    // We need to redo this logic and the associated parts of the processor. 
+    midiLogQueue.clear();
+    return;
 }
 
 void MainComponent::showControllerSelector() {

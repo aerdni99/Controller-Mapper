@@ -25,8 +25,17 @@ public:
     void resized() override;
     SDL_Gamepad* getController();
     int initializeSDL();
+    int scanControllers();
+    void changeController();
 
 private:
     SDL_JoystickID* scannedGamepadIDs;
+    int numGamepads;
+    int selectedGamepad;
+
+    juce::TextButton rescanButton{ "Rescan Controllers" };
+    juce::ComboBox controllerDropdown;
+    juce::Label statusLabel;
+
 };
 

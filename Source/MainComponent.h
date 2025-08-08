@@ -14,7 +14,8 @@
     your controls and content.
 */
 class MainComponent  : public juce::Component,
-    public juce::Timer
+    public juce::Timer,
+    public juce::MidiInputCallback
 {
 public:
     //==============================================================================
@@ -24,8 +25,9 @@ public:
     //==============================================================================
     void paint (juce::Graphics& g) override;
     void resized() override;
-    void logMidiMessage(const juce::MidiMessage& message);
     void timerCallback() override;
+
+    void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
 
 private:
     //==============================================================================
@@ -46,6 +48,8 @@ private:
     juce::StringArray midiLogQueue;
 
     SDL_Gamepad* controller;
+
+    std::unique_ptr<juce::MidiInput> midiInput;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
