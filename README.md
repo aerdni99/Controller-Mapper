@@ -121,3 +121,5 @@ Saveable scenes might not be a function of my app, but more a function of the DA
 need to handle if loopMidi closes still.
 
 assigning joystick axes is not gonna be intuitive since they almost always send both signals. Learn Midi CC will not be enough to assign them. instead they'll need manually assigned in my GUI.
+
+The Ableton user script will also need installation instructions in order to give someone a useable demo of this product.
