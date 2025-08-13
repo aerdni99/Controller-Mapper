@@ -119,3 +119,5 @@ I'll need to make sure that I don't try to send 2 controllers to the same channe
 Saveable scenes might not be a function of my app, but more a function of the DAW? It would be great to have my program remember which parameters were assigned where and when, but it'll be hard to get that together. It'd need to be a 2-way communication where my application listens to my DAW for ID's/names of parameters being edited, otherwise, there's no scene to save on my application's side. User's will just be assigning controls on the fly and the state of the app is unaffected.
 
 need to handle if loopMidi closes still.
+
+assigning joystick axes is not gonna be intuitive since they almost always send both signals. Learn Midi CC will not be enough to assign them. instead they'll need manually assigned in my GUI.

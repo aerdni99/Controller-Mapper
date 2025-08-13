@@ -181,8 +181,8 @@ void MainComponent::timerCallback() {
             break;
         }
         case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
-            int axisVal = axisConversion(event.gaxis);
             // Joystick Deadzone
+            int axisVal = axisConversion(event.gaxis);
             if (axisVal == 63 && event.gaxis.axis < 4) {
                 break;
             }
