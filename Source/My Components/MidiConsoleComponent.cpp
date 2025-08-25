@@ -31,6 +31,7 @@ void MidiConsoleComponent::resized() {
     // No Child Components
 }
 
+// This member function is called from within MainComponent's timerCallback to transfer messages from the main component's queue to the component's queue
 void MidiConsoleComponent::appendMessage(const juce::String& msg) {
     pendingLines.add(msg);
 }

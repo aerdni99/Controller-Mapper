@@ -9,6 +9,9 @@
       <FILE id="klvhdy" name="MainComponent.cpp" compile="1" resource="0"
             file="Source/MainComponent.cpp"/>
     </GROUP>
+    <FILE id="VYGQ60" name="AssignsTable.cpp" compile="1" resource="0"
+          file="Source/My Components/AssignsTable.cpp"/>
+    <FILE id="VeSp32" name="AssignsTable.h" compile="0" resource="0" file="Source/My Components/AssignsTable.h"/>
     <FILE id="pMFhVq" name="ComponentResizerBar.h" compile="0" resource="0"
           file="Source/My Components/ComponentResizerBar.h"/>
     <FILE id="cloX6x" name="ControllerSelector.cpp" compile="1" resource="0"
@@ -21,6 +24,9 @@
           file="Source/My Components/MidiConsoleComponent.cpp"/>
     <FILE id="LHFjnL" name="MidiConsoleComponent.h" compile="0" resource="0"
           file="Source/My Components/MidiConsoleComponent.h"/>
+    <FILE id="QbOSH9" name="MyOSCReceiver.cpp" compile="1" resource="0"
+          file="Source/My Components/MyOSCReceiver.cpp"/>
+    <FILE id="ve3b62" name="MyOSCReceiver.h" compile="0" resource="0" file="Source/My Components/MyOSCReceiver.h"/>
     <FILE id="jBN6DB" name="PS4ControllerGraphic.cpp" compile="1" resource="0"
           file="Source/My Components/PS4ControllerGraphic.cpp"/>
     <FILE id="uHa3SZ" name="PS4ControllerGraphic.h" compile="0" resource="0"
@@ -40,6 +46,7 @@
     <MODULE id="juce_gui_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_gui_extra" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
     <MODULE id="juce_midi_ci" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
+    <MODULE id="juce_osc" showAllCode="1" useLocalCopy="0" useGlobalPath="1"/>
   </MODULES>
   <JUCEOPTIONS JUCE_STRICT_REFCOUNTEDPOINTER="1"/>
   <EXPORTFORMATS>
@@ -63,6 +70,7 @@
         <MODULEPATH id="juce_gui_basics" path="../../../JUCE/modules"/>
         <MODULEPATH id="juce_gui_extra" path="../../../JUCE/modules"/>
         <MODULEPATH id="juce_midi_ci" path="../../../JUCE/modules"/>
+        <MODULEPATH id="juce_osc" path="../../JUCE/modules"/>
       </MODULEPATHS>
     </VS2022>
   </EXPORTFORMATS>

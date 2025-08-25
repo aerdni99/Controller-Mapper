@@ -31,7 +31,6 @@ public:
 
 private:
     //==============================================================================
-    // Your private member variables go here...
     juce::StretchableLayoutManager layoutManager;
 
     std::unique_ptr<MainContent> mainScreen;
@@ -58,6 +57,11 @@ private:
     juce::String decodeAxis(int axis);
 
     int sceneOffset;
+
+    void sendToConsole();
+    void SDLPolling();
+
+    void myOscFunction();
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

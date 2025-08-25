@@ -1,10 +1,7 @@
 #include "MainComponent.h"
 
-//==============================================================================
-MainComponent::MainComponent()
-{
-    // Make sure you set the size of the component after
-    // you add any child components.
+MainComponent::MainComponent() {
+    //==============================================================================
     setSize(1000, 800);
 
     mainScreen = std::make_unique<MainContent>();
@@ -26,6 +23,7 @@ MainComponent::MainComponent()
     layoutManager.setItemLayout(1, -0.00, -0.00, -0.00);
     layoutManager.setItemLayout(2, -0.00, -0.00, -0.00);
 
+    //==============================================================================
     // Start timer for polling midi messages
     startTimerHz(30);
 
@@ -36,13 +34,20 @@ MainComponent::MainComponent()
     controllerSelector = std::make_unique<ControllerSelector>();
     controller = controllerSelector->getController();
 
-    // Midi input (for testing)
+    // Midi input (This looks for the virtual midi port called "Controller Mapper" and listens for inputs from that controller. Change this to "KeyLab mkII 61" To listen to my keyboard
     auto midiInputs = juce::MidiInput::getAvailableDevices();
-    if (!midiInputs.isEmpty()) {
-        auto deviceInfo = midiInputs[0];
-        midiInput = juce::MidiInput::openDevice(deviceInfo.identifier, this);
-        if (midiInput)
-            midiInput->start();
+    if (midiInputs.isEmpty()) {
+        DBG("No MIDI devices detected");
+    } 
+    else {
+        for (auto& device : midiInputs) {
+            if (device.name == "Controller Mapper") {
+                midiInput = juce::MidiInput::openDevice(device.identifier, this);
+                if (midiInput)
+                    midiInput->start();
+            }
+        }
+        
     }
 
     // Open MIDI output to virtual device
@@ -72,14 +77,12 @@ MainComponent::MainComponent()
     DBG("Construction Complete!");
 }
 
-MainComponent::~MainComponent()
-{
+MainComponent::~MainComponent() {
 }
 
 //==============================================================================
 
-void MainComponent::paint (juce::Graphics& g)
-{
+void MainComponent::paint (juce::Graphics& g) {
     auto area = getLocalBounds().reduced(10);
 
     // (Our component is white
@@ -88,10 +91,9 @@ void MainComponent::paint (juce::Graphics& g)
     g.fillRect(area);
 }
 
-void MainComponent::resized()
-{
+void MainComponent::resized() {
     // This is generally where you'll want to lay out the positions of any
-// subcomponents in your editor..
+    // subcomponents in your editor..
     auto area = getLocalBounds().reduced(10);
 
     juce::Component* components[] = {
@@ -129,7 +131,7 @@ void MainComponent::toggleConsole() {
     resized();
 }
 
-// This function 
+// This function constructs MIDI messages and adds them to a string array object. 
 void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) {
     if (!isConsoleVisible) return;
 
@@ -153,64 +155,12 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
     return;
 }
 
-void MainComponent::timerCallback() {
-
-
-    
+void MainComponent::timerCallback() { 
     // poll for SDL messages.
-    SDL_Event event;
-    SDL_Gamepad* myController;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_EVENT_GAMEPAD_ADDED: {
-            myController = SDL_OpenGamepad(event.gdevice.which);
-            DBG("New Controller Connected Named: " << SDL_GetGamepadName(myController));
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_REMOVED: {
-            myController = SDL_OpenGamepad(event.gdevice.which);
-            DBG("Controller Removed Named: " << SDL_GetGamepadName(myController));
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
-            DBG("Controller Button Down: ");
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_BUTTON_UP: {
-            DBG("Controller Button Up: ");
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
-            // Joystick Deadzone
-            int axisVal = axisConversion(event.gaxis);
-            if (axisVal == 63 && event.gaxis.axis < 4) {
-                break;
-            }
+    SDLPolling();
 
-            // Log Event
-            DBG(decodeAxis(event.gaxis.axis) << axisVal);
-
-            // Send a MIDI Message to my virtual port
-            midiOutput->sendMessageNow(juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal));
-            break;
-        }
-        case SDL_EVENT_QUIT: {
-            DBG("SDL_QUIT received.");
-            break;
-        }
-        default: {
-            break;
-        }
-        }
-    }
-
-    // log midi messages to my console
-    std::scoped_lock lock(midiLogMutex);
-    for (const auto& msg : midiLogQueue) {
-        midiConsole->appendMessage(msg);
-    }
-
-    midiLogQueue.clear();
+    // log incoming midi messages to MY CONSOLE
+    sendToConsole();
     return;
 }
 
@@ -254,4 +204,75 @@ juce::String MainComponent::decodeAxis(int axis) {
         // I don't anticipate hitting this error,. but if I do, this handling is weak.
         return juce::String("<undefined axis>: " + juce::String(axis));
     }
+}
+
+void MainComponent::sendToConsole() {
+    std::scoped_lock lock(midiLogMutex);
+    for (const auto& msg : midiLogQueue) {
+        midiConsole->appendMessage(msg);
+    }
+
+    midiLogQueue.clear();
+    return;
+}
+
+void MainComponent::SDLPolling() {
+    SDL_Event event;
+    SDL_Gamepad* myController;
+    while (SDL_PollEvent(&event)) {
+        switch (event.type) {
+        case SDL_EVENT_GAMEPAD_ADDED: {
+            myController = SDL_OpenGamepad(event.gdevice.which);
+            // DBG("New Controller Connected Named: " << SDL_GetGamepadName(myController));
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_REMOVED: {
+            myController = SDL_OpenGamepad(event.gdevice.which);
+            // DBG("Controller Removed Named: " << SDL_GetGamepadName(myController));
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
+            // DBG("Controller Button Down: ");
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+            // DBG("Controller Button Up: ");
+            break;
+        }
+        case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
+            // Joystick Deadzone
+            int axisVal = axisConversion(event.gaxis);
+            if (axisVal == 63 && event.gaxis.axis < 4) {
+                break;
+            }
+
+            // Log Event
+            DBG(decodeAxis(event.gaxis.axis) << axisVal);
+
+            // Send a MIDI Message to my virtual port
+            midiOutput->sendMessageNow(juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal));
+            break;
+        }
+        case SDL_EVENT_QUIT: {
+            DBG("SDL_QUIT received.");
+            break;
+        }
+        default: {
+            break;
+        }
+        }
+    }
+    return;
+}
+
+void MainComponent::myOscFunction() {
+    juce::OSCSender oscSender;
+
+    bool connected = oscSender.connect("127.0.0.1", 9000);
+    if (!connected) {
+        DBG("OSC Connection Failed;");
+    }
+    juce::OSCMessage msg("/transport/play", 1);
+    oscSender.send(msg);
+    return;
 }

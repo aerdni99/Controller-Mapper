@@ -41,47 +41,48 @@ SDL_Gamepad* ControllerSelector::getController() {
 }
 
 int ControllerSelector::initializeSDL() {
+    DBG("================Initializing SDL================");
     if (SDL_Init(SDL_INIT_GAMEPAD | SDL_INIT_EVENTS) < 0) {
-        DBG("SDL Failed");
+         DBG("SDL Failed");
         Uint32 initted = SDL_WasInit(0);
         if (initted & SDL_INIT_GAMEPAD)
-            DBG("GAMEPAD subsystem initialized");
+             DBG("GAMEPAD subsystem initialized");
         else
-            DBG("GAMEPAD subsystem NOT initialized");
+             DBG("GAMEPAD subsystem NOT initialized");
 
         if (initted & SDL_INIT_EVENTS)
-            DBG("EVENTS subsystem initialized");
+             DBG("EVENTS subsystem initialized");
     }
     else {
-        DBG("SDL Initialized Successfully!");
+         DBG("SDL Initialized Successfully!");
 
         // Get the default controller
         scanControllers();
 
         // Check out what we got
         if (scannedGamepadIDs == NULL) {
-            DBG("SDL_GetGamepads() Failed");
+             DBG("SDL_GetGamepads() Failed");
         }
         else {
-            DBG("SDL_GetGamepads() Succeeded");
+             DBG("SDL_GetGamepads() Succeeded");
 
             juce::String message = "numGamePads: " + juce::String(numGamepads);
-            DBG(message);
+             DBG(message);
 
             if (numGamepads > 0) {
                 for (int i = 0; i < numGamepads; i++) {
                     SDL_Gamepad* myController = SDL_OpenGamepad(scannedGamepadIDs[i]);
                     juce::String controllerName = SDL_GetGamepadName(myController);
                     message = "Controller #: " + juce::String(numGamepads) + ", Name: " + controllerName;
-                    DBG(message);
+                     DBG(message);
                 }
             }
             else {
-                DBG("No Controllers Detected At Startup");
+                 DBG("No Controllers Detected At Startup");
             }
-            DBG("\n\n\n");
         }
     }
+    DBG("================================================\n");
     return 0;
 }
 
