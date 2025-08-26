@@ -26,42 +26,39 @@ public:
     void paint (juce::Graphics& g) override;
     void resized() override;
     void timerCallback() override;
-
     void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
 
 private:
     //==============================================================================
-    juce::StretchableLayoutManager layoutManager;
 
+    // This group of members are the different sections of the application window. 
+    juce::StretchableLayoutManager layoutManager;
     std::unique_ptr<MainContent> mainScreen;
     std::unique_ptr<MidiConsoleComponent> midiConsole;
     std::unique_ptr<ComponentResizerBar> resizerBar;
-    std::unique_ptr<ControllerSelector> controllerSelector;
+    std::unique_ptr<ControllerSelector> controllerSelector; // Currently not doing anything, but I wanted to add the ability to select acvite controller(s) at some point
 
-    bool isConsoleVisible = false;
-
+    // MIDI Console Related
+    bool isConsoleVisible = false;  
     void toggleConsole();
-    void showControllerSelector();
-
-    int axisConversion(SDL_GamepadAxisEvent axisEvent);
-    int deadzoneOffset;
-
+    void sendToConsole();
     std::mutex midiLogMutex;
     juce::StringArray midiLogQueue;
 
-    SDL_Gamepad* controller;
-
+    // For MIDI I/O
     std::unique_ptr<juce::MidiInput> midiInput;
     std::unique_ptr<juce::MidiOutput> midiOutput;
 
-    juce::String decodeAxis(int axis);
-
-    int sceneOffset;
-
-    void sendToConsole();
+    // SDL Related
     void SDLPolling();
+    juce::String decodeAxis(int axis);
+    int axisConversion(SDL_GamepadAxisEvent axisEvent);
 
-    void myOscFunction();
+    // Controller Related
+    SDL_Gamepad* controller;
+    void showControllerSelector();
+    int deadzoneOffset;
+    int sceneOffset; // Currently unused I believe, This was to be used for swapping mapped controller contexts
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

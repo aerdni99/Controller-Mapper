@@ -2,7 +2,7 @@
 
 MainComponent::MainComponent() {
     //==============================================================================
-    setSize(1000, 800);
+    setSize(400, 300);
 
     mainScreen = std::make_unique<MainContent>();
     mainScreen->onToggleConsole = [this]() {
@@ -262,17 +262,5 @@ void MainComponent::SDLPolling() {
         }
         }
     }
-    return;
-}
-
-void MainComponent::myOscFunction() {
-    juce::OSCSender oscSender;
-
-    bool connected = oscSender.connect("127.0.0.1", 9000);
-    if (!connected) {
-        DBG("OSC Connection Failed;");
-    }
-    juce::OSCMessage msg("/transport/play", 1);
-    oscSender.send(msg);
     return;
 }

@@ -12,6 +12,8 @@
 
 #include <JuceHeader.h>
 #include <SDL3/SDL.h>
+#include "MyOSCReceiver.h"
+
 
 class MainContent : public juce::Component
 {
@@ -28,4 +30,8 @@ private:
     juce::TextButton menuButton{ "Menu" };
     juce::Label controllerLabel;
     bool isConsoleVisible = false;
+
+    // JUCE OSC related (Open Sound Protocol)
+    void myOscSender(); // for sending OSC messages
+    MyOSCReceiver OSCReceiver; // for receiving OSC messages
 };

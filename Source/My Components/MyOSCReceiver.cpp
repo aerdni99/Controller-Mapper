@@ -13,6 +13,8 @@
 
 //==============================================================================
 MyOSCReceiver::MyOSCReceiver() {
+    connect(8000);
+    addListener(this, "/juce");
     addListener(this, "/transport/play");
     addListener(this, "/view/zoom");
 }
@@ -53,5 +55,9 @@ void MyOSCReceiver::oscMessageReceived(const juce::OSCMessage& message) {
     else if (message.getAddressPattern().toString() == "/view/zoom") {
         float zoomLevel = message[0].getFloat32();
         DBG("Zoom Level: " << zoomLevel);
+    }
+    else if (message.getAddressPattern().toString() == "/juce") {
+        int randNum = message[0].getInt32();
+        DBG("Random Number: " << randNum);
     }
 }

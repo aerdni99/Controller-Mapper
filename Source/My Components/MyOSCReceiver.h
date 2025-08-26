@@ -16,8 +16,6 @@
 /*
 *   reference https://docs.juce.com/master/classOSCReceiver.html
 *   reference https://www.youtube.com/watch?v=klv1O_1wuio
-*     - 
-*     -
 */
 class MyOSCReceiver  : public juce::Component,
     public juce::OSCReceiver,

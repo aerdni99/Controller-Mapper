@@ -23,6 +23,9 @@ MainContent::MainContent() {
                 isConsoleVisible = !isConsoleVisible;
                 onToggleConsole();
             });
+        menu.addItem("Send OSC", [this]() {
+            myOscSender();
+            });
 
         menu.showMenuAsync(juce::PopupMenu::Options().withTargetComponent(&menuButton));
 
@@ -34,4 +37,16 @@ void MainContent::paint(juce::Graphics& g) {
     g.fillAll(juce::Colours::white);
 }
 void MainContent::resized() {
+}
+
+void MainContent::myOscSender() {
+    juce::OSCSender oscSender;
+
+    bool connected = oscSender.connect("127.0.0.1", 9000);
+    if (!connected) {
+        DBG("OSC Connection Failed;");
+    }
+    juce::OSCMessage msg("/transport/play", 1);
+    oscSender.send(msg);
+    return;
 }
