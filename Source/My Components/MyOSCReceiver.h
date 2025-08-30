@@ -29,6 +29,7 @@ public:
     void resized() override;
 
     void oscMessageReceived(const juce::OSCMessage& message) override;
+    std::function<void(const juce::OSCMessage&)> onMessageReceived;
 
 private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MyOSCReceiver)

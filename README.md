@@ -123,3 +123,28 @@ need to handle if loopMidi closes still.
 assigning joystick axes is not gonna be intuitive since they almost always send both signals. Learn Midi CC will not be enough to assign them. instead they'll need manually assigned in my GUI.
 
 The Ableton user script will also need installation instructions in order to give someone a useable demo of this product.
+
+### Live Object Model Notes:
+[https://docs.cycling74.com/legacy/max8/vignettes/live_object_model](https://docs.cycling74.com/legacy/max8/vignettes/live_object_model)
+    (Cursor nudge, looping)
+"current_song_time" - property of *live_set*, type float (get, set, observe), the playing position in hte live set in beats
+"start_time" - float, the position in the live set where playing will start, in beats.
+
+    (Play/Stop/Record)
+"is_playing" - property of *live_set*, type bool (get, set, observe), Get/set if Live's transport is running
+"record_mode" - property of *live_set*, type bool (set/get/observe), 1 = the arrangement record button is on.
+"session_record", "session_record_status" - ...
+--- note function start_playing(), stop_playing(), and trigger_session_record()
+
+    (Looping)
+"loop" - property of *live_set*, type bool (get, set, observe), Get/set the enabled state of the Arrangement loop
+"loop_length" - property of *live_set*, type float (get/set/observe), Arrangement loop length in beats.
+"loop_start" - property of *live_set*, type float (get/set/observe), Arrangement loop start in beats.
+--- pseudocode for working with the loop
+--- to set loop start, get cursor position with current_song_time and set loop_start to that value.
+--- to set loop end, get cursor position and loop start and take the difference. if its negative, no change, if positive, set loop length to difference.
+--- note that current_song_time might refer to the position of the playback needle, and not the position of the select cursor. investigate later.
+--- note that punch_in and punch_out are properties of live_set as well and can be used for additional functionality.
+
+
+

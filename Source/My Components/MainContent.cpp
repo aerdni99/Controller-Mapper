@@ -31,9 +31,15 @@ MainContent::MainContent() {
 
         };
     addAndMakeVisible(menuButton);
+    addAndMakeVisible(assignTable);
+
+    OSCReceiver.onMessageReceived = [this](const juce::OSCMessage& msg) {
+        assignTable.processOSC(msg);
+    };
 }
 void MainContent::paint(juce::Graphics& g) {
     menuButton.setBounds(10, 10, 60, 24);
+    assignTable.setBounds(80, 44, 552, 162); // row height 22 * 6 rows + header height 28 + 2 border = 162
     g.fillAll(juce::Colours::white);
 }
 void MainContent::resized() {
@@ -46,7 +52,7 @@ void MainContent::myOscSender() {
     if (!connected) {
         DBG("OSC Connection Failed;");
     }
-    juce::OSCMessage msg("/transport/play", 1);
+    juce::OSCMessage msg("/test", 1);
     oscSender.send(msg);
     return;
 }

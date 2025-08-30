@@ -2,7 +2,7 @@
 
 MainComponent::MainComponent() {
     //==============================================================================
-    setSize(400, 300);
+    setSize(800, 500);
 
     mainScreen = std::make_unique<MainContent>();
     mainScreen->onToggleConsole = [this]() {
@@ -240,7 +240,7 @@ void MainComponent::SDLPolling() {
             break;
         }
         case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
-            // Joystick Deadzone
+            // Adjusted current value of axis from 0-127.
             int axisVal = axisConversion(event.gaxis);
             if (axisVal == 63 && event.gaxis.axis < 4) {
                 break;
@@ -249,7 +249,10 @@ void MainComponent::SDLPolling() {
             // Log Event
             DBG(decodeAxis(event.gaxis.axis) << axisVal);
 
-            // Send a MIDI Message to my virtual port
+            /* Send a MIDI Message to my virtual port
+            *    How am I determining what CC message is associated with each axis? I want to expose that and add debugging for it in my program
+            *    This will be helpful for my "Learn Mode" and mapping in general.
+            */
             midiOutput->sendMessageNow(juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal));
             break;
         }
