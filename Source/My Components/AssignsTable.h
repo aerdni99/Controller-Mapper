@@ -25,6 +25,7 @@ public:
     void paint (juce::Graphics&) override;
     void resized() override;
 
+    std::function<void(const int, const bool)> onButtonClicked;
     void clearMapping(int rowNumber);
     void assignMapping(int rowNumber);
     void processOSC(const juce::OSCMessage& msg);

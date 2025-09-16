@@ -34,6 +34,6 @@ private:
     AssignsTable assignTable;
 
     // JUCE OSC related (Open Sound Protocol)
-    void myOscSender(); // for sending OSC messages
+    void myOscSender(int route, bool mapping); // for sending OSC messages
     MyOSCReceiver OSCReceiver; // for receiving OSC messages
 };

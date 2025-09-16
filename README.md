@@ -146,5 +146,5 @@ The Ableton user script will also need installation instructions in order to giv
 --- note that current_song_time might refer to the position of the playback needle, and not the position of the select cursor. investigate later.
 --- note that punch_in and punch_out are properties of live_set as well and can be used for additional functionality.
 
-
+note that I need to add what MIDI CC number each controller axis is mapped to to my assigns table so that users can manually bind mappings as well as use my "Learn Mode"
 

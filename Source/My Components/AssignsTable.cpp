@@ -100,12 +100,19 @@ juce::Component* AssignsTable::refreshComponentForCell(int rowNumber, int column
 
         btn->onClick = [this, rowNumber, columnId] {
             // In here I need to initate talking to M4L. 
+
             if (columnId == colButton1) {
-                assignMapping();
+                //assignMapping();
                 DBG("Mapping " << rows[rowNumber].name);
+                if (onButtonClicked) {
+                    onButtonClicked(rowNumber + 1, true);
+                }
             }
             else {
                 DBG("Clearing mapping for " << rows[rowNumber].name);
+                if (onButtonClicked) {
+                    onButtonClicked(rowNumber + 1, false);
+                }
             }
         };
         return btn;
