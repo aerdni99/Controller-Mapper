@@ -36,11 +36,12 @@ private:
     bool isConsoleVisible = false;
     AssignsTable assignTable;
     int sceneOffset;
-    int rowSelection;
+    int selRow;
 
     // JUCE OSC related (Open Sound Protocol)
     void myOscSender(int route); // for sending OSC messages
     MyOSCReceiver OSCReceiver; // for receiving OSC messages
 
     juce::Array<juce::var> mappedParams;
+    juce::var getParamKey(int rowNum, juce::String key);
 };

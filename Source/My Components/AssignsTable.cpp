@@ -14,7 +14,7 @@
 //==============================================================================
 AssignsTable::AssignsTable()
 {
-    table.getHeader().addColumn("Name", colName, 150);
+    table.getHeader().addColumn("Control Axis", colName, 150);
     table.getHeader().addColumn("Parameter", colDescriptor, 200);
     table.getHeader().addColumn("Map", colButton1, 100);
     table.getHeader().addColumn("Clear Mapping", colButton2, 100);
@@ -26,12 +26,18 @@ AssignsTable::AssignsTable()
     table.setModel(this);
     addAndMakeVisible(table);
 
-    rows.add({ "LS-X", "N/A" });
-    rows.add({ "LS-Y", "N/A" });
-    rows.add({ "RS-X", "N/A" });
-    rows.add({ "RS-Y", "N/A" });
-    rows.add({ "L2", "N/A" });
-    rows.add({ "R2", "N/A" });
+    // Initialize Parameter Names
+    parameterNames.resize(6);
+    for (auto& name : parameterNames) {
+        name = "Not Mapped";
+    }
+
+    rows.add({ "LS-X" });
+    rows.add({ "LS-Y" });
+    rows.add({ "RS-X" });
+    rows.add({ "RS-Y" });
+    rows.add({ "L2" });
+    rows.add({ "R2" });
 
     DBG("Header Height" << table.getHeader().getHeight());
 }
@@ -109,11 +115,24 @@ juce::Component* AssignsTable::refreshComponentForCell(int rowNumber, int column
             }
             else {
                 if (onButtonClicked) {
+                    parameterNames.set(rowNumber, "Not Mapped");
+                    table.updateContent();
                     onButtonClicked(rowNumber, false);
                 }
             }
         };
         return btn;
+    }
+    if (columnId == colDescriptor) {
+        auto* label = dynamic_cast<juce::Label*>(existingComponentToUpdate);
+
+        if (label == nullptr) {
+            label = new juce::Label();
+        }
+        label->setText(parameterNames[rowNumber], juce::dontSendNotification);
+        label->setColour(juce::Label::textColourId, juce::Colours::black);
+
+        return label;
     }
     return nullptr;
 }
@@ -123,7 +142,9 @@ void AssignsTable::clearMapping(int rowNumber) {
     return;
 }
 
-void AssignsTable::assignMapping(int rowNumber) {
+void AssignsTable::assignMapping(int rowNum, juce::String paramName) {
+    parameterNames.set(rowNum, paramName);
+    table.updateContent();
     return;
 }
 

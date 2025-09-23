@@ -17,8 +17,7 @@ MyOSCReceiver::MyOSCReceiver() {
         DBG("OSCReceiver failed to open port.");
     }
     addListener(this, "/is/playing");
-    addListener(this, "/mapped/parameter");
-    addListener(this, "/clear");
+    addListener(this, "/mapped");
 }
 
 MyOSCReceiver::~MyOSCReceiver() {

@@ -27,7 +27,7 @@ public:
 
     std::function<void(const int, const bool)> onButtonClicked;
     void clearMapping(int rowNumber);
-    void assignMapping(int rowNumber);
+    void assignMapping(int rowNum, juce::String paramName);
     void processOSC(const juce::OSCMessage& msg);
     
 
@@ -51,6 +51,8 @@ private:
     void paintRowBackground(juce::Graphics& g, int rowNumber, int width, int height, bool rowIsSelected) override;
     void paintCell(juce::Graphics& g, int rowNumber, int columnId, int width, int height, bool rowIsSelected) override;
     juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, juce::Component* existingComponentToUpdate) override;
+
+    juce::Array<juce::String> parameterNames;
 
 
 

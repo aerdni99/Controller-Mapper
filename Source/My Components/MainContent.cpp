@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    mainContent.cpp
+    MainContent.cpp
     Created: 1 Jul 2025 5:02:37pm
     Author:  aerdn
 
@@ -33,14 +33,14 @@ MainContent::MainContent() {
 
     // Mapping button event handling ===========================================
     assignTable.onButtonClicked = [this](const int route, const bool mapping) {
-        rowSelection = route;
+        selRow = route;
         if (!mapping) {
-            if (mappedParams[rowSelection].isVoid()) {
-                DBG("No Parameter Mapped to " << decodeAxis(rowSelection));
+            if (mappedParams[selRow].isVoid()) {
+                DBG("No Parameter Mapped to " << decodeAxis(selRow));
             }
             else {
-                DBG("Clearing Parameter: " << mappedParams[rowSelection].getDynamicObject()->getProperty("name").toString() << " at " << decodeAxis(rowSelection));
-                mappedParams.set(rowSelection, juce::var());
+                DBG("Clearing Parameter: " << mappedParams[selRow].getDynamicObject()->getProperty("name").toString() << " at " << decodeAxis(selRow));
+                mappedParams.set(selRow, juce::var());
             }
         }
         else {
@@ -56,14 +56,11 @@ MainContent::MainContent() {
             int playState = msg[0].getInt32();
             DBG("Transport play state: " << playState);
         }
-        else if (msg.getAddressPattern().toString() == "/mapped/parameter") {
+        else if (msg.getAddressPattern().toString() == "/mapped") {
             juce::var parsed = juce::JSON::parse(msg[0].getString());
-            mappedParams.set(rowSelection, parsed);
-            DBG("Paraemeter Mapped: " << mappedParams[rowSelection].getDynamicObject()->getProperty("name").toString());
-        }
-        else if (msg.getAddressPattern().toString() == "/clear") {
-
-
+            mappedParams.set(selRow, parsed);
+            assignTable.assignMapping(selRow, getParamKey(selRow, "name").toString());
+            DBG("Paraemeter Mapped: " << getParamKey(selRow, "name").toString());
         }
         return;
     };
@@ -125,4 +122,8 @@ juce::String MainContent::decodeAxis(int rowNum) {
         // I don't anticipate hitting this error,. but if I do, this handling is weak.
         return juce::String("<undefined axis>: " + juce::String(rowNum));
     }
+}
+
+juce::var MainContent::getParamKey(int rowNum, juce::String key) {
+    return mappedParams[rowNum].getDynamicObject()->getProperty(key);
 }
