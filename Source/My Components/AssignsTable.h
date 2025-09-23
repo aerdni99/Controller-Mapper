@@ -53,6 +53,7 @@ private:
     juce::Component* refreshComponentForCell(int rowNumber, int columnId, bool isRowSelected, juce::Component* existingComponentToUpdate) override;
 
 
+
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (AssignsTable)
 };
 

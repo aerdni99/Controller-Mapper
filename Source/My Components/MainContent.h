@@ -26,14 +26,21 @@ public:
     void resized() override;
     std::function<void()> onShowControllerSelector;
     std::function<void()> onToggleConsole;
+    void setSceneOffset(int offset);
+
+    juce::String decodeAxis(int rowNum);
 
 private:
     juce::TextButton menuButton{ "Menu" };
     juce::Label controllerLabel;
     bool isConsoleVisible = false;
     AssignsTable assignTable;
+    int sceneOffset;
+    int rowSelection;
 
     // JUCE OSC related (Open Sound Protocol)
-    void myOscSender(int route, bool mapping); // for sending OSC messages
+    void myOscSender(int route); // for sending OSC messages
     MyOSCReceiver OSCReceiver; // for receiving OSC messages
+
+    juce::Array<juce::var> mappedParams;
 };

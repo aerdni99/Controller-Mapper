@@ -11,6 +11,8 @@
 #include "mainContent.h"
 
 MainContent::MainContent() {
+
+    // Top Left Menu Button ====================================================
     menuButton.onClick = [this]() {
         juce::PopupMenu menu;
         menu.addItem("Controllers...", [this]() {
@@ -28,16 +30,48 @@ MainContent::MainContent() {
 
         };
     addAndMakeVisible(menuButton);
+
+    // Mapping button event handling ===========================================
+    assignTable.onButtonClicked = [this](const int route, const bool mapping) {
+        rowSelection = route;
+        if (!mapping) {
+            if (mappedParams[rowSelection].isVoid()) {
+                DBG("No Parameter Mapped to " << decodeAxis(rowSelection));
+            }
+            else {
+                DBG("Clearing Parameter: " << mappedParams[rowSelection].getDynamicObject()->getProperty("name").toString() << " at " << decodeAxis(rowSelection));
+                mappedParams.set(rowSelection, juce::var());
+            }
+        }
+        else {
+            myOscSender(route);
+        }
+        return;
+    };
     addAndMakeVisible(assignTable);
 
-    assignTable.onButtonClicked = [this](const int route, const bool mapping) {
-        myOscSender(route, mapping);
+    // OSC Receiver Message Handling ===========================================
+    OSCReceiver.onMessageReceived = [this](const juce::OSCMessage& msg) {
+        if (msg.getAddressPattern().toString() == "/is/playing") {
+            int playState = msg[0].getInt32();
+            DBG("Transport play state: " << playState);
+        }
+        else if (msg.getAddressPattern().toString() == "/mapped/parameter") {
+            juce::var parsed = juce::JSON::parse(msg[0].getString());
+            mappedParams.set(rowSelection, parsed);
+            DBG("Paraemeter Mapped: " << mappedParams[rowSelection].getDynamicObject()->getProperty("name").toString());
+        }
+        else if (msg.getAddressPattern().toString() == "/clear") {
+
+
+        }
+        return;
     };
 
-    OSCReceiver.onMessageReceived = [this](const juce::OSCMessage& msg) {
-        assignTable.processOSC(msg);
-    };
+    // Set Parameter Mappings to NULL by Default ===============================
+    mappedParams.resize(6);
 }
+
 void MainContent::paint(juce::Graphics& g) {
     menuButton.setBounds(10, 10, 60, 24);
     assignTable.setBounds(80, 44, 552, 162); // row height 22 * 6 rows + header height 28 + 2 border = 162
@@ -46,50 +80,49 @@ void MainContent::paint(juce::Graphics& g) {
 void MainContent::resized() {
 }
 
-void MainContent::myOscSender(int route, bool mapping) {
-
+void MainContent::myOscSender(int route) {
     /*
-        route 1 - LSX
-        route 2 - LSY
-        route 3 - RSX
-        route 4 - RSY
-        route 5 - L2
-        route 6 - R2
+        route 0 - LSX
+        route 1 - LSY
+        route 2 - RSX
+        route 3 - RSY
+        route 4 - L2
+        route 5 - R2
     */
-    juce::OSCSender oscSender;
 
+    juce::OSCSender oscSender;
     bool connected = oscSender.connect("127.0.0.1", 9000);
     if (!connected) {
         DBG("OSC Connection Failed;");
     }
-    juce::String myRoute;
 
-    switch (route) {
-    case 1:
-        myRoute = "/LSX";
-        break;
-    case 2:
-        myRoute = "/LSY";
-        break;
-    case 3:
-        myRoute = "/RSX";
-        break;
-    case 4:
-        myRoute = "/RSY";
-        break;
-    case 5:
-        myRoute = "/L2";
-        break;
-    case 6:
-        myRoute = "/R2";
-        break;
-    default:
-        myRoute = "/error";
-        DBG("Bad osc message sent");
-        break;
-    }
-
-    juce::OSCMessage msg(myRoute, mapping);
+    juce::OSCMessage msg("/map", route + sceneOffset);
     oscSender.send(msg);
     return;
+}
+
+void MainContent::setSceneOffset(int offset) {
+    sceneOffset = offset;
+    return;
+}
+
+// This function is copied from MainComponent. I should find a way to eliminate the copy/paste later if I get around to it. For better practice's sake
+juce::String MainContent::decodeAxis(int rowNum) {
+    switch (rowNum) {
+    case 0:
+        return juce::String("LS X");
+    case 1:
+        return juce::String("LS Y");
+    case 2:
+        return juce::String("RS X");
+    case 3:
+        return juce::String("RS Y");
+    case 4:
+        return juce::String("L2");
+    case 5:
+        return juce::String("R2");
+    default:
+        // I don't anticipate hitting this error,. but if I do, this handling is weak.
+        return juce::String("<undefined axis>: " + juce::String(rowNum));
+    }
 }

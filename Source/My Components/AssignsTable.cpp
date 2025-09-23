@@ -88,6 +88,7 @@ juce::Component* AssignsTable::refreshComponentForCell(int rowNumber, int column
     if (columnId == colButton1 || columnId == colButton2) {
         auto* btn = dynamic_cast<juce::TextButton*>(existingComponentToUpdate);
 
+        // Create Mapping Buttons
         if (btn == nullptr) {
             btn = new juce::TextButton();
         }
@@ -98,20 +99,17 @@ juce::Component* AssignsTable::refreshComponentForCell(int rowNumber, int column
             btn->setButtonText("Clear Mapping");
         }
 
+        // When a button is clicked, send the row # and mapping flag back to main content
         btn->onClick = [this, rowNumber, columnId] {
-            // In here I need to initate talking to M4L. 
-
             if (columnId == colButton1) {
-                //assignMapping();
-                DBG("Mapping " << rows[rowNumber].name);
                 if (onButtonClicked) {
-                    onButtonClicked(rowNumber + 1, true);
+                    DBG("Awaiting Mapping");
+                    onButtonClicked(rowNumber, true);
                 }
             }
             else {
-                DBG("Clearing mapping for " << rows[rowNumber].name);
                 if (onButtonClicked) {
-                    onButtonClicked(rowNumber + 1, false);
+                    onButtonClicked(rowNumber, false);
                 }
             }
         };
@@ -132,12 +130,4 @@ void AssignsTable::assignMapping(int rowNumber) {
 void AssignsTable::processOSC(const juce::OSCMessage& msg) {
     // This function expects to see messages addressed like "/mapped"
     // The message should Have the parameter name and ID. The ID will be stored in secret so that we can clear it later, and the Name will be sent to the Parameter Column.
-
-
-    // This logic is for playback state, not a concern of the AssignsTable, but it was the first OSC message processing that I did so I pasted it here for reference.
-    /*if (msg.getAddressPattern().toString() == "/is/playing") {
-        int playState = msg[0].getInt32();
-        DBG("Transport play state: " << playState);
-    }*/
-    return;
 }

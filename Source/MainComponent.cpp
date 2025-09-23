@@ -73,6 +73,7 @@ MainComponent::MainComponent() {
 
     // Scene 1 uses midi CC numbers 11-16. when the scene changes, this number will change based on the available sets of CC codes.
     sceneOffset = 11;
+    mainScreen->setSceneOffset(sceneOffset);
 
     DBG("Construction Complete!");
 }
@@ -132,27 +133,55 @@ void MainComponent::toggleConsole() {
 }
 
 // This function constructs MIDI messages and adds them to a string array object. 
-void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) {
+//void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) {
+//    if (!isConsoleVisible) return;
+//
+//    juce::String msgText;
+//
+//    if (message.isNoteOn()) {
+//        msgText = "Note On: " + juce::MidiMessage::getMidiNoteName(message.getNoteNumber(), true, true, 3)
+//            + "Vel: " + juce::String(message.getVelocity());
+//    }
+//    else if (message.isNoteOff()) {
+//        msgText = "Note Off: " + juce::MidiMessage::getMidiNoteName(message.getNoteNumber(), true, true, 3);
+//    }
+//    else if (message.isController()) {
+//        msgText = "Control Change: CC#" + juce::String(message.getControllerNumber()) + "Val: " + juce::String(message.getControllerValue());
+//    }
+//    else {
+//        msgText = message.getDescription();
+//    }
+//
+//    midiLogQueue.add(msgText);
+//    return;
+//}
+
+void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
+{
     if (!isConsoleVisible) return;
 
     juce::String msgText;
-
-    if (message.isNoteOn()) {
+    if (message.isNoteOn())
         msgText = "Note On: " + juce::MidiMessage::getMidiNoteName(message.getNoteNumber(), true, true, 3)
-            + "Vel: " + juce::String(message.getVelocity());
-    }
-    else if (message.isNoteOff()) {
+        + " Vel: " + juce::String(message.getVelocity());
+    else if (message.isNoteOff())
         msgText = "Note Off: " + juce::MidiMessage::getMidiNoteName(message.getNoteNumber(), true, true, 3);
-    }
-    else if (message.isController()) {
-        msgText = "Control Change: CC#" + juce::String(message.getControllerNumber()) + "Val: " + juce::String(message.getControllerValue());
-    }
-    else {
+    else if (message.isController())
+        msgText = "Control Change: CC#" + juce::String(message.getControllerNumber())
+        + " Val: " + juce::String(message.getControllerValue());
+    else
         msgText = message.getDescription();
+
+    {
+        std::scoped_lock lock(midiLogMutex);
+        midiLogQueue.add(msgText);
     }
 
-    midiLogQueue.add(msgText);
-    return;
+    // Schedule console update on the message thread
+    juce::MessageManager::callAsync([this]
+        {
+            sendToConsole();
+        });
 }
 
 void MainComponent::timerCallback() { 
@@ -249,11 +278,20 @@ void MainComponent::SDLPolling() {
             // Log Event
             DBG(decodeAxis(event.gaxis.axis) << axisVal);
 
-            /* Send a MIDI Message to my virtual port
-            *    How am I determining what CC message is associated with each axis? I want to expose that and add debugging for it in my program
-            *    This will be helpful for my "Learn Mode" and mapping in general.
+            /*  
+            *   Send a MIDI Message to my virtual port
+            *   How am I determining what CC message is associated with each axis? I want to expose that and add debugging for it in my program
+            *   This will be helpful for my "Learn Mode" and mapping in general.
+            * 
+            *   arg 1 - midi channel
+            *   arg 2 - cc#
+            *   arg3 - cc value
             */
-            midiOutput->sendMessageNow(juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal));
+
+            auto myMessage = juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal);
+            midiOutput->sendMessageNow(myMessage);
+            handleIncomingMidiMessage(nullptr, myMessage);
+
             break;
         }
         case SDL_EVENT_QUIT: {
@@ -264,6 +302,14 @@ void MainComponent::SDLPolling() {
             break;
         }
         }
+    }
+    return;
+}
+
+void MainComponent::setSceneOffset(int offset) {
+    sceneOffset = offset;
+    if (mainScreen) {
+        mainScreen->setSceneOffset(offset);
     }
     return;
 }
