@@ -52,7 +52,7 @@ private:
     // SDL Related
     void SDLPolling();
     juce::String decodeAxis(int axis);
-    int axisConversion(SDL_GamepadAxisEvent axisEvent);
+    float axisConversion(SDL_GamepadAxisEvent axisEvent);
 
     // Controller Related
     SDL_Gamepad* controller;

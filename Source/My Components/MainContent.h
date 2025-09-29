@@ -24,11 +24,15 @@ public:
 
     void paint(juce::Graphics& g) override;
     void resized() override;
+
     std::function<void()> onShowControllerSelector;
     std::function<void()> onToggleConsole;
-    void setSceneOffset(int offset);
 
+    void setSceneOffset(int offset);
     juce::String decodeAxis(int rowNum);
+    void postParamVal(int axis, float val);
+
+    void setSelRow(int rowNum);
 
 private:
     juce::TextButton menuButton{ "Menu" };
@@ -39,9 +43,9 @@ private:
     int selRow;
 
     // JUCE OSC related (Open Sound Protocol)
-    void myOscSender(int route); // for sending OSC messages
+    void myOscSender(juce::String route, float value, juce::String path); // for sending OSC messages
     MyOSCReceiver OSCReceiver; // for receiving OSC messages
 
     juce::Array<juce::var> mappedParams;
-    juce::var getParamKey(int rowNum, juce::String key);
+    float adjustParamVal(float min, float max, float value);
 };

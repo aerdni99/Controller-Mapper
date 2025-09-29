@@ -25,7 +25,7 @@ MainComponent::MainComponent() {
 
     //==============================================================================
     // Start timer for polling midi messages
-    startTimerHz(30);
+    startTimerHz(10);
 
     // Initialize GUI components
     resized();
@@ -197,22 +197,25 @@ void MainComponent::showControllerSelector() {
     return;
 }
 
-int MainComponent::axisConversion(SDL_GamepadAxisEvent axisEvent) {
+float MainComponent::axisConversion(SDL_GamepadAxisEvent axisEvent) {
     //Trigger
     if (axisEvent.axis == 4 || axisEvent.axis == 5) {
-        return axisEvent.value * 127.0f / 32767;
+        return axisEvent.value * 1.0f / 32767;
     }
 
     //Joystick
     if (deadzoneOffset > 0 && abs(axisEvent.value) < deadzoneOffset) {
         // return center value
-        return 63;
+        return 0.5f;
     }
-    int maxVal = (32767 - deadzoneOffset);
-    if (axisEvent.value > 0) {
-        return (axisEvent.value - deadzoneOffset + maxVal) * (127.0f / (2 * maxVal));
+    float absVal;
+    if (axisEvent.value < 0) {
+        absVal = (static_cast<float>(axisEvent.value + deadzoneOffset) / 65534.0f) + 0.5f;
     }
-    return (axisEvent.value + deadzoneOffset + maxVal) * (127.0f / (2 * maxVal));
+    else {
+        absVal = (static_cast<float>(axisEvent.value - deadzoneOffset) / 65534.0f) + 0.5f;
+    }
+    return absVal;
 }
 
 juce::String MainComponent::decodeAxis(int axis) {
@@ -270,28 +273,22 @@ void MainComponent::SDLPolling() {
         }
         case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
             // Adjusted current value of axis from 0-127.
-            int axisVal = axisConversion(event.gaxis);
-            if (axisVal == 63 && event.gaxis.axis < 4) {
+            float axisVal = axisConversion(event.gaxis);
+
+            // Don't process SDL messages inside our deadzone
+            if (axisVal == 0.5f && event.gaxis.axis < 4) {
                 break;
             }
 
+            mainScreen->setSelRow(event.gaxis.axis);
+
             // Log Event
-            DBG(decodeAxis(event.gaxis.axis) << axisVal);
-
-            /*  
-            *   Send a MIDI Message to my virtual port
-            *   How am I determining what CC message is associated with each axis? I want to expose that and add debugging for it in my program
-            *   This will be helpful for my "Learn Mode" and mapping in general.
-            * 
-            *   arg 1 - midi channel
-            *   arg 2 - cc#
-            *   arg3 - cc value
-            */
-
+            if (event.gaxis.axis = 1)
+                DBG(decodeAxis(event.gaxis.axis) << axisVal);
             auto myMessage = juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal);
-            midiOutput->sendMessageNow(myMessage);
             handleIncomingMidiMessage(nullptr, myMessage);
 
+            mainScreen->postParamVal(event.gaxis.axis, axisVal);
             break;
         }
         case SDL_EVENT_QUIT: {

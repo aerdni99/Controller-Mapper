@@ -44,7 +44,8 @@ MainContent::MainContent() {
             }
         }
         else {
-            myOscSender(route);
+            // Pass garbage values for value and path since they will not be used (Could overload the function, but unnecessary
+            myOscSender("/map", -1, "");
         }
         return;
     };
@@ -59,8 +60,15 @@ MainContent::MainContent() {
         else if (msg.getAddressPattern().toString() == "/mapped") {
             juce::var parsed = juce::JSON::parse(msg[0].getString());
             mappedParams.set(selRow, parsed);
-            assignTable.assignMapping(selRow, getParamKey(selRow, "name").toString());
-            DBG("Paraemeter Mapped: " << getParamKey(selRow, "name").toString());
+
+            juce::String name = mappedParams[selRow].getDynamicObject()->getProperty("name").toString();
+            assignTable.assignMapping(selRow, name);
+            DBG("Paraemeter Mapped: " << name);
+
+            float min = mappedParams[selRow].getDynamicObject()->getProperty("min");
+            float max = mappedParams[selRow].getDynamicObject()->getProperty("max");
+            DBG("MIN VAL: " << min);
+            DBG("MAX VAL: " << max);
         }
         return;
     };
@@ -77,7 +85,7 @@ void MainContent::paint(juce::Graphics& g) {
 void MainContent::resized() {
 }
 
-void MainContent::myOscSender(int route) {
+void MainContent::myOscSender(juce::String route, float value, juce::String path) {
     /*
         route 0 - LSX
         route 1 - LSY
@@ -93,7 +101,7 @@ void MainContent::myOscSender(int route) {
         DBG("OSC Connection Failed;");
     }
 
-    juce::OSCMessage msg("/map", route + sceneOffset);
+    juce::OSCMessage msg(route, value, path);
     oscSender.send(msg);
     return;
 }
@@ -124,6 +132,27 @@ juce::String MainContent::decodeAxis(int rowNum) {
     }
 }
 
-juce::var MainContent::getParamKey(int rowNum, juce::String key) {
-    return mappedParams[rowNum].getDynamicObject()->getProperty(key);
+void MainContent::postParamVal(int axis, float value) {
+
+    if (mappedParams[axis].isVoid()) {
+        return;
+    }
+
+    float min = mappedParams[selRow].getDynamicObject()->getProperty("min");
+    float max = mappedParams[selRow].getDynamicObject()->getProperty("max");
+    juce::String path = mappedParams[selRow].getDynamicObject()->getProperty("path").toString();
+
+    float adjVal = adjustParamVal(min, max, value);
+    myOscSender("/post", adjVal, path);
+}
+
+float MainContent::adjustParamVal(float min, float max, float value) {
+    float range = max - min;
+    float adjVal = value * range;
+    adjVal += min;
+    return adjVal;
+}
+
+void MainContent::setSelRow(int rowNum) {
+    selRow = rowNum;
 }
