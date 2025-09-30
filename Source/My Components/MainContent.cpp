@@ -138,9 +138,9 @@ void MainContent::postParamVal(int axis, float value) {
         return;
     }
 
-    float min = mappedParams[selRow].getDynamicObject()->getProperty("min");
-    float max = mappedParams[selRow].getDynamicObject()->getProperty("max");
-    juce::String path = mappedParams[selRow].getDynamicObject()->getProperty("path").toString();
+    float min = mappedParams[axis].getDynamicObject()->getProperty("min");
+    float max = mappedParams[axis].getDynamicObject()->getProperty("max");
+    juce::String path = mappedParams[axis].getDynamicObject()->getProperty("path").toString();
 
     float adjVal = adjustParamVal(min, max, value);
     myOscSender("/post", adjVal, path);

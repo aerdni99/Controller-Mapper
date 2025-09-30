@@ -1,5 +1,14 @@
 #include "MainComponent.h"
 
+const SDL_GamepadAxis AXES[] = {
+        SDL_GAMEPAD_AXIS_LEFTX,
+        SDL_GAMEPAD_AXIS_LEFTY,
+        SDL_GAMEPAD_AXIS_RIGHTX,
+        SDL_GAMEPAD_AXIS_RIGHTY,
+        SDL_GAMEPAD_AXIS_LEFT_TRIGGER,
+        SDL_GAMEPAD_AXIS_RIGHT_TRIGGER
+};
+
 MainComponent::MainComponent() {
     //==============================================================================
     setSize(800, 500);
@@ -25,7 +34,7 @@ MainComponent::MainComponent() {
 
     //==============================================================================
     // Start timer for polling midi messages
-    startTimerHz(10);
+    startTimerHz(30);
 
     // Initialize GUI components
     resized();
@@ -74,6 +83,10 @@ MainComponent::MainComponent() {
     // Scene 1 uses midi CC numbers 11-16. when the scene changes, this number will change based on the available sets of CC codes.
     sceneOffset = 11;
     mainScreen->setSceneOffset(sceneOffset);
+    
+    for (auto axis : AXES) {
+        isResting[axis] = false;
+    }
 
     DBG("Construction Complete!");
 }
@@ -184,10 +197,10 @@ void MainComponent::handleIncomingMidiMessage(juce::MidiInput* source, const juc
         });
 }
 
-void MainComponent::timerCallback() { 
-    // poll for SDL messages.
-    SDLPolling();
+void MainComponent::timerCallback() {
 
+    // Handle Controller Messages
+    SDLPolling();
     // log incoming midi messages to MY CONSOLE
     sendToConsole();
     return;
@@ -197,24 +210,29 @@ void MainComponent::showControllerSelector() {
     return;
 }
 
-float MainComponent::axisConversion(SDL_GamepadAxisEvent axisEvent) {
+float MainComponent::axisConversion(int axisVal, int axis) {
     //Trigger
-    if (axisEvent.axis == 4 || axisEvent.axis == 5) {
-        return axisEvent.value * 1.0f / 32767;
+    if (axis == SDL_GAMEPAD_AXIS_LEFT_TRIGGER || axis == SDL_GAMEPAD_AXIS_RIGHT_TRIGGER) {
+        return axisVal * 1.0f / 32767;
     }
 
     //Joystick
-    if (deadzoneOffset > 0 && abs(axisEvent.value) < deadzoneOffset) {
+    if (deadzoneOffset > 0 && abs(axisVal) < deadzoneOffset) {
         // return center value
         return 0.5f;
     }
+
     float absVal;
-    if (axisEvent.value < 0) {
-        absVal = (static_cast<float>(axisEvent.value + deadzoneOffset) / 65534.0f) + 0.5f;
+    if (axisVal < 0) {
+        absVal = (static_cast<float>(axisVal + deadzoneOffset) / (65534.0f - (2 * deadzoneOffset))) + 0.5f;
     }
     else {
-        absVal = (static_cast<float>(axisEvent.value - deadzoneOffset) / 65534.0f) + 0.5f;
+        absVal = (static_cast<float>(axisVal - deadzoneOffset) / (65534.0f - (2 * deadzoneOffset))) + 0.5f;
     }
+    if (axis == SDL_GAMEPAD_AXIS_LEFTY || axis == SDL_GAMEPAD_AXIS_RIGHTY) {
+        absVal = 1 - absVal;
+    }
+
     return absVal;
 }
 
@@ -249,55 +267,60 @@ void MainComponent::sendToConsole() {
 }
 
 void MainComponent::SDLPolling() {
-    SDL_Event event;
-    SDL_Gamepad* myController;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_EVENT_GAMEPAD_ADDED: {
-            myController = SDL_OpenGamepad(event.gdevice.which);
-            // DBG("New Controller Connected Named: " << SDL_GetGamepadName(myController));
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_REMOVED: {
-            myController = SDL_OpenGamepad(event.gdevice.which);
-            // DBG("Controller Removed Named: " << SDL_GetGamepadName(myController));
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
-            // DBG("Controller Button Down: ");
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_BUTTON_UP: {
-            // DBG("Controller Button Up: ");
-            break;
-        }
-        case SDL_EVENT_GAMEPAD_AXIS_MOTION: {
-            // Adjusted current value of axis from 0-127.
-            float axisVal = axisConversion(event.gaxis);
+    SDL_Event e;
 
-            // Don't process SDL messages inside our deadzone
-            if (axisVal == 0.5f && event.gaxis.axis < 4) {
+    while (SDL_PollEvent(&e)) {
+        switch (e.type) {
+            case SDL_EVENT_GAMEPAD_ADDED: {
+                controller = SDL_OpenGamepad(e.gdevice.which);
+                // DBG("New Controller Connected Named: " << SDL_GetGamepadName(myController));
                 break;
             }
-
-            mainScreen->setSelRow(event.gaxis.axis);
-
-            // Log Event
-            if (event.gaxis.axis = 1)
-                DBG(decodeAxis(event.gaxis.axis) << axisVal);
-            auto myMessage = juce::MidiMessage::controllerEvent(1, event.gaxis.axis + sceneOffset, axisVal);
-            handleIncomingMidiMessage(nullptr, myMessage);
-
-            mainScreen->postParamVal(event.gaxis.axis, axisVal);
-            break;
+            case SDL_EVENT_GAMEPAD_REMOVED: {
+                controller = SDL_OpenGamepad(e.gdevice.which);
+                // DBG("Controller Removed Named: " << SDL_GetGamepadName(myController));
+                break;
+            }
+            case SDL_EVENT_GAMEPAD_BUTTON_DOWN: {
+                // DBG("Controller Button Down: ");
+                break;
+            }
+            case SDL_EVENT_GAMEPAD_BUTTON_UP: {
+                // DBG("Controller Button Up: ");
+                break;
+            }
+            case SDL_EVENT_QUIT: {
+                DBG("SDL_QUIT received.");
+                break;
+            }
+            default: {
+                break;
+            }
         }
-        case SDL_EVENT_QUIT: {
-            DBG("SDL_QUIT received.");
-            break;
+    }
+
+    // @BUG: The resting state for triggers is 0, not 0.5. My code needs to reflect this
+    std::unordered_map<SDL_GamepadAxis, float> lastAxisEvents;
+
+    // For each gamepad axis, get the current value and update the app
+    for (auto axis : AXES) {
+        int raw = SDL_GetGamepadAxis(controller, axis);
+        float axisVal = axisConversion(raw, axis);
+
+        // Set parameter if we got a new value
+        if (axisVal != 0.5f) {
+            isResting[axis] = false;
+            mainScreen->postParamVal(axis, axisVal);
+            //auto myMessage = juce::MidiMessage::controllerEvent(1, axis + sceneOffset, axisVal);
+            //handleIncomingMidiMessage(nullptr, myMessage);
         }
-        default: {
-            break;
-        }
+
+        // If we are resting, don't bother passing repeat default values
+        else if (!isResting[axis]) {
+            isResting[axis] = true;
+            mainScreen->postParamVal(axis, axisVal);
+            //auto myMessage = juce::MidiMessage::controllerEvent(1, axis + sceneOffset, axisVal);
+            //handleIncomingMidiMessage(nullptr, myMessage);
         }
     }
     return;

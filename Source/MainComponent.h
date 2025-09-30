@@ -52,7 +52,7 @@ private:
     // SDL Related
     void SDLPolling();
     juce::String decodeAxis(int axis);
-    float axisConversion(SDL_GamepadAxisEvent axisEvent);
+    float axisConversion(int axisVal, int axis);
 
     // Controller Related
     SDL_Gamepad* controller;
@@ -61,6 +61,7 @@ private:
     int sceneOffset; // Currently unused I believe, This was to be used for swapping mapped controller contexts
 
     void setSceneOffset(int offset);
+    std::unordered_map<SDL_GamepadAxis, bool> isResting;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };
