@@ -2,6 +2,8 @@
 
 A JUCE-based MIDI controller mapping tool for PlayStation controllers.
 
+Watch my [Demo Video 📽️](https://youtu.be/OB9Wi6VK8hE?si=mHcPfyyRAZtk5BY6)
+
 ## 📋 Overview
 
 This application detects gamepads connected to your PC and allows you to map PlayStation controller inputs to MIDI messages for use in your DAW. While support is currently to be limited to DualShock PS4 controllers, future versions may introduce dynamic detection and mapping for other devices.
